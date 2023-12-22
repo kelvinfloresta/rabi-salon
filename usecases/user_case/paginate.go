@@ -12,7 +12,15 @@ type PaginateFilter struct {
 	Name  *string
 }
 
+var EMPTY_PAGINATION = g.PaginateOutput{
+	Data: []g.PaginateData{},
+}
+
 func (c UserCase) Paginate(ctx *app_context.AppContext, input PaginateFilter, paginate database.PaginateInput) (*g.PaginateOutput, error) {
+	if ctx.Session.Role.IsUser() {
+		return &EMPTY_PAGINATION, nil
+	}
+
 	return c.gateway.Paginate(g.PaginateFilter{
 		City:  input.City,
 		State: input.State,

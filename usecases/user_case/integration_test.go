@@ -73,22 +73,25 @@ func Test_Integration_should_be_able_to_retrive_by_id(t *testing.T) {
 	require.Equal(t, EXPECTED, responseBody)
 }
 
-func Test_Integration_should_be_able_to_paginate(t *testing.T) {
+func Test_Integration_should_be_able_to_paginate_if_is_a_backoffice_user(t *testing.T) {
 	fixtures.CleanDatabase()
 
 	for i := 0; i < 5; i++ {
 		fixtures.User.Create(t, nil)
 	}
 
+	id := fixtures.User.Create(t, nil)
+	backofficeToken := fixtures.NewBackofficeToken(t, id)
+
 	responseBody := user_gateway.PaginateOutput{}
 	statusCode := fixtures.Get(t, fixtures.GetInput{
 		URI:      fixtures.User.URI,
 		Response: &responseBody,
-		Token:    fixtures.User.Login(t, nil),
+		Token:    backofficeToken,
 	})
 
 	require.Equal(t, http.StatusOK, statusCode)
-	require.Len(t, responseBody.Data, 5)
+	require.Len(t, responseBody.Data, 6)
 	require.Equal(t, 1, responseBody.MaxPages)
 
 	for i := range responseBody.Data {
@@ -98,7 +101,28 @@ func Test_Integration_should_be_able_to_paginate(t *testing.T) {
 		require.Equal(t, "State", responseBody.Data[i].State)
 		require.Equal(t, "Photo", responseBody.Data[i].Photo)
 	}
+}
 
+func Test_Integration_should_not_be_able_to_paginate_if_is_a_common_user(t *testing.T) {
+	fixtures.CleanDatabase()
+
+	for i := 0; i < 5; i++ {
+		fixtures.User.Create(t, nil)
+	}
+
+	id := fixtures.User.Create(t, nil)
+	token := fixtures.User.Login(t, &id)
+
+	responseBody := user_gateway.PaginateOutput{}
+	statusCode := fixtures.Get(t, fixtures.GetInput{
+		URI:      fixtures.User.URI,
+		Response: &responseBody,
+		Token:    token,
+	})
+
+	require.Equal(t, http.StatusOK, statusCode)
+	require.Len(t, responseBody.Data, 0)
+	require.Equal(t, 0, responseBody.MaxPages)
 }
 
 func Test_Integration_should_be_able_to_update(t *testing.T) {
