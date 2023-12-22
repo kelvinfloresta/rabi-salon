@@ -46,19 +46,7 @@ type GetByIDOutput struct {
 }
 
 type PatchFilter struct {
-	ID             *string
-	ZIP            *string
-	Phone          *string
-	City           *string
-	State          *string
-	TaxID          *string
-	SocialID       *string
-	Street         *string
-	Complement     *string
-	EmergencyPhone *string
-	Name           *string
-	Email          *string
-	Photo          *string
+	ID string
 }
 
 type PatchValues struct {

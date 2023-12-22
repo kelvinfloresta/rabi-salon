@@ -9,9 +9,8 @@ import (
 )
 
 func (c *UserController) Patch(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
 	filter := &user_case.PatchFilter{
-		ID: &id,
+		ID: ctx.Params("id"),
 	}
 
 	data := user_case.PatchValues{}
